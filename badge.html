@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<title>Create Your Own TeamHooman Badge</title>
+		<link href='http://fonts.googleapis.com/css?family=VT323|Press+Start+2P' rel='stylesheet' type='text/css'/>
+		<style type="text/css">
+		body {
+			background: #f0f0f0;
+		}
+		h1 {
+			text-align: center;
+		}
+		#badge_form {
+			text-align: center;
+			max-width: 800px;
+			margin: auto;
+		}
+		canvas {
+			border: 1px solid #c6c6c6;
+			margin: 2em auto;
+			display: block;
+		}
+		#force_font {
+			font-family: 'VT323';
+			overflow: hidden;
+			color: transparent;
+			height: 0;
+			width: 0;
+		}
+		input[type=number] {
+			text-align: right;
+		}
+		#dpi {
+			width: 4em;
+		}
+		#print_badge {
+			display: none;
+		}
+		@media print {
+			body {
+				background: transparent;
+			}
+			h1,
+			#badge_form,
+			#preview_badge,
+			#force_font {
+				display: none;
+			}
+			#print_badge {
+				display: block;
+				border-width: 0.5mm;
+				border-style: dashed;
+			}
+		}
+		</style>
+		<script type="text/javascript" src="jquery-2.1.4.min.js"></script>
+		<script type="text/javascript" src="badge.js"></script>
+	</head>
+	<body onload="setTimeout(function() { updatePreview(); }, 0);">
+		<div id="force_font">-</div>
+		<h1>Create Your Own TeamHooman Badge!</h1>
+
+		<form action="javascript:;" id="badge_form">
+			<label for="username">Username:</label>
+			<input type="text" id="username" placeholder="(User-)Name" autofocus/>
+
+			<label for="format">Format:</label>
+			<select id="format">
+				<option value="105x74">105 &times; 74 mm</option>
+				<option value="90x58">90 &times; 58 mm</option>
+				<option value="85x54">85 &times; 54 mm</option>
+				<option value="75x40">75 &times; 40 mm</option>
+			</select>
+			
+			<label for="dpi">DPI:</label>
+			<input id="dpi" type="number" min="1" step="1" value="200" />
+
+			<button type="submit">Download...</button>
+			<button type="button" onclick="printBadge(); return false;">Print</button>
+		</form>
+
+		<canvas id="preview_badge"></canvas>
+		<canvas id="print_badge"></canvas>
+	</body>
+</html>
