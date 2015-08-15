@@ -16,8 +16,10 @@
 			max-width: 800px;
 			margin: auto;
 		}
-		canvas {
+		.show-border canvas {
 			border: 1px solid #c6c6c6;
+		}
+		canvas {
 			margin: 2em auto;
 			display: block;
 		}
@@ -47,17 +49,19 @@
 			#force_font {
 				display: none;
 			}
-			#print_badge {
-				display: block;
+			.show-border #print_badge {
 				border-width: 0.5mm;
 				border-style: dashed;
+			}
+			#print_badge {
+				display: block;
 			}
 		}
 		</style>
 		<script type="text/javascript" src="jquery-2.1.4.min.js"></script>
 		<script type="text/javascript" src="badge.js"></script>
 	</head>
-	<body onload="setTimeout(function() { updatePreview(); }, 0);">
+	<body onload="setTimeout(function() { updatePreview(); }, 0);" class="show-border">
 		<div id="force_font">-</div>
 		<h1>Create Your Own TeamHooman Badge!</h1>
 
@@ -76,7 +80,11 @@
 			<label for="dpi">DPI:</label>
 			<input id="dpi" type="number" min="1" step="1" value="200" />
 
-			<button type="submit">Download...</button>
+			<button type="submit">Save as PNG</button>
+
+			<input id="border" type="checkbox" checked/>
+			<label for="border">show border</label>
+
 			<button type="button" onclick="printBadge(); return false;">Print</button>
 		</form>
 
