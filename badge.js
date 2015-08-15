@@ -102,24 +102,38 @@ function getBadgeParams () {
 	var format = $('#format').val().split('x');
 
 	return {
-		username: $('#username').val(),
-		border: $('#border').prop('checked'),
-		width:  parseInt(format[0], 10),
-		height: parseInt(format[1], 10),
-		dpi:    parseInt($('#dpi').val(), 10)
+		username:   $('#username').val(),
+		link:       $('#link').val(),
+		border:     $('#border').prop('checked'),
+		background: $('#background').prop('checked'),
+		width:      parseInt(format[0], 10),
+		height:     parseInt(format[1], 10),
+		dpi:        parseInt($('#dpi').val(), 10)
 	};
 }
 
-function drawBadge (canvas, username, width, height, dpmm) {
-	var pixWidth  = Math.floor(width  * dpmm);
-	var pixHeight = Math.floor(height * dpmm);
+function drawBadge (canvas, options) {
+	var width     = options.width;
+	var height    = options.height;
+	var pixWidth  = Math.floor(width  * options.dpmm);
+	var pixHeight = Math.floor(height * options.dpmm);
 
 	canvas.width  = pixWidth;
 	canvas.height = pixHeight;
 
 	var ctx = canvas.getContext("2d");
-	ctx.fillStyle = '#FFFFFF';
-	ctx.fillRect(0, 0, pixWidth, pixHeight);
+
+	if (options.background) {
+		var gradient = ctx.createRadialGradient(pixWidth/2, 0, 0, pixWidth/2, 0, pixHeight);
+		gradient.addColorStop(0,"white");
+		gradient.addColorStop(1,"#ADF0FF");
+		ctx.fillStyle = gradient;
+		ctx.fillRect(0,0,pixWidth,pixWidth);
+	}
+	else {
+		ctx.fillStyle = '#FFFFFF';
+		ctx.fillRect(0, 0, pixWidth, pixHeight);
+	}
 
 //	ctx.imageSmoothingEnabled = false;
 	ctx.lineCap = 'square';
@@ -130,19 +144,25 @@ function drawBadge (canvas, username, width, height, dpmm) {
 	ctx.fillStyle   = '#FFF000';
 	ctx.strokeStyle = '#000000';
 
-	ctx.font = (pixHeight * 0.17) + 'px "Press Start 2P"';
+	ctx.font = (pixHeight * 0.14) + 'px "Press Start 2P"';
 	ctx.lineWidth = Math.round(pixHeight * 0.05);
-	outlineText(ctx, '#TEAMHOOMAN', pixWidth / 2, pixHeight * 0.38, pixWidth * 0.8);
+	outlineText(ctx, '#TEAMHOOMAN', pixWidth / 2, pixHeight * 0.34, pixWidth * 0.7);
 
 	var img = loader.get("gandsHoomans");
-	var imgSize = pixHeight * 0.35;
+	var imgSize = pixHeight * 0.3;
 //	ctx.imageSmoothingEnabled = true;
 	ctx.drawImage(img, pixWidth / 2 - imgSize / 2, pixHeight * 0.05, imgSize, imgSize);
 //	ctx.imageSmoothingEnabled = false;
 
 	ctx.font = (pixHeight * 0.1) + 'px "Press Start 2P"';
 	ctx.lineWidth = Math.round(pixHeight * 0.03);
-	outlineText(ctx, username, pixWidth / 2, pixHeight * 0.7, pixWidth * 0.9);
+	outlineText(ctx, options.username, pixWidth / 2, pixHeight * (options.link ? 0.6 : 0.7), pixWidth * 0.9);
+
+	if (options.link) {
+		ctx.font = (pixHeight * 0.06) + 'px "Press Start 2P"';
+		ctx.lineWidth = Math.round(pixHeight * 0.025);
+		outlineText(ctx, options.link, pixWidth / 2, pixHeight * 0.78, pixWidth * 0.9);
+	}
 }
 
 function outlineText (ctx, text, x, y, maxWidth) {
@@ -155,7 +175,9 @@ function equalState (s1, s2) {
 	       s1.dpi    === s2.dpi &&
 	       s1.width  === s2.width &&
 	       s1.height === s2.height &&
-	       s1.border === s2.border;
+	       s1.border === s2.border &&
+	       s1.background === s2.background &&
+	       s1.link === s2.link;
 }
 
 function updatePreview (forceUpdate) {
@@ -163,7 +185,7 @@ function updatePreview (forceUpdate) {
 	var changed = !equalState(params, lastState);
 	if (changed || forceUpdate) {
 		var canvas = $('#preview_badge')[0];
-		drawBadge(canvas, params.username, params.width, params.height, getPixelsPerUnit('mm'));
+		drawBadge(canvas, $.extend({dpmm: getPixelsPerUnit('mm')}, params));
 
 		if (params.border) {
 			$(document.body).addClass('show-border');
@@ -174,10 +196,12 @@ function updatePreview (forceUpdate) {
 
 		if (changed && history.pushState) {
 			history.pushState(params, document.title, "?"+$.param({
-				username: params.username,
-				dpi:      params.dpi,
-				format:   params.width + 'x' + params.height,
-				border:   params.border
+				username:   params.username,
+				link:       params.link,
+				dpi:        params.dpi,
+				format:     params.width + 'x' + params.height,
+				border:     params.border,
+				background: params.background
 			}));
 		}
 	}
@@ -192,7 +216,7 @@ function downloadBadge () {
 	var canvas = document.createElement("canvas");
 	var link = document.createElement("a");
 	link.download = "teamhooman_badge.png";
-	drawBadge(canvas, params.username, params.width, params.height, params.dpi / MM_PER_INCH);
+	drawBadge(canvas, $.extend({dpmm: params.dpi / MM_PER_INCH}, params));
 
 	if (canvas.toBlob) {
 		canvas.toBlob(function (blob) {
@@ -237,7 +261,7 @@ function printBadge () {
 	var params = getBadgeParams();
 	var $badge = $("#print_badge");
 	var canvas = $badge[0];
-	drawBadge(canvas, params.username, params.width, params.height, params.dpi / MM_PER_INCH);
+	drawBadge(canvas, $.extend({dpmm: params.dpi / MM_PER_INCH}, params));
 	$badge.css({
 		width:  params.width+'mm',
 		height: params.height+'mm'
@@ -259,24 +283,28 @@ $(document).ready(function ($) {
 
 	$("#badge_form").submit(downloadBadge);
 	
-	$("#username").val(params.username||'').keyup(defer(updatePreview));
-	$("#username, #format, #dpi, #border").change(updatePreview);
+	$("#username").val(params.username||'').on('keyup cut paste drop', defer(updatePreview));
+	$("#link").val(params.link||'').on('keyup cut paste drop', defer(updatePreview));
+	$("#username, #format, #dpi, #border, #background").change(updatePreview);
 	if (params.format) $("#format").val(params.format);
 	if (params.dpi) $("#dpi").val(params.dpi);
 	$("#border").prop('checked', 'border' in params ? parseBool(params.border) : true);
+	$("#background").prop('checked', 'border' in params ? parseBool(params.background) : true);
 });
 
 $(window).on('popstate', function (event) {
-	var state = event.originalEvent.state;
-	if (!state) {
-		state = parseParams(location.search.replace(/^\?/,''));
+	var params = event.originalEvent.state;
+	if (!params) {
+		params = parseParams(location.search.replace(/^\?/,''));
 	}
-	$("#username").val(state.username||'');
-	var $format = $("#format").val(state.width + 'x' + state.height);
+	$("#username").val(params.username||'');
+	$("#link").val(params.link||'');
+	var $format = $("#format").val(params.width + 'x' + params.height);
 	if (!$format.val()) $format.val('105x74');
-	$("#dpi").val(state.dpi||200);
-	$("#border").prop('checked', 'border' in state ? parseBool(state.border) : true);
+	$("#dpi").val(params.dpi||200);
+	$("#border").prop('checked', 'border' in params ? parseBool(params.border) : true);
+	$("#background").prop('checked', 'border' in params ? parseBool(params.background) : true);
 	
 	var canvas = $('#preview_badge')[0];
-	drawBadge(canvas, state.username, state.width, state.height, getPixelsPerUnit('mm'));
+	drawBadge(canvas, $.extend({dpmm: getPixelsPerUnit('mm')}, params));
 });

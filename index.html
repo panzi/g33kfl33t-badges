@@ -40,6 +40,10 @@
 		#print_badge {
 			display: none;
 		}
+		.optional {
+			opacity: 0.5;
+			font-size: 0.8em;
+		}
 		@media print {
 			body {
 				background: transparent;
@@ -69,6 +73,9 @@
 		<form action="javascript:;" id="badge_form">
 			<label for="username">Username:</label>
 			<input type="text" id="username" placeholder="(User-)Name" autofocus/>
+			
+			<label for="link">Link <span class="optional">(optional)</span>:</label>
+			<input type="text" id="link" placeholder="example.com"/>
 
 			<label for="format">Format:</label>
 			<select id="format">
@@ -80,6 +87,9 @@
 			
 			<label for="dpi">DPI:</label>
 			<input id="dpi" type="number" min="1" step="1" value="200" />
+
+			<input id="background" type="checkbox" checked/>
+			<label for="background">background</label>
 
 			<button type="submit">Save as PNG</button>
 
