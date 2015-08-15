@@ -158,9 +158,10 @@ function equalState (s1, s2) {
 	       s1.border === s2.border;
 }
 
-function updatePreview () {
+function updatePreview (forceUpdate) {
 	var params = getBadgeParams();
-	if (!equalState(params, lastState)) {
+	var changed = !equalState(params, lastState);
+	if (changed || forceUpdate) {
 		var canvas = $('#preview_badge')[0];
 		drawBadge(canvas, params.username, params.width, params.height, getPixelsPerUnit('mm'));
 
@@ -171,7 +172,7 @@ function updatePreview () {
 			$(document.body).removeClass('show-border');
 		}
 
-		if (history.pushState) {
+		if (changed && history.pushState) {
 			history.pushState(params, document.title, "?"+$.param({
 				username: params.username,
 				dpi:      params.dpi,
