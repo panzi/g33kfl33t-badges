@@ -2,9 +2,10 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=640, initial-scale=1"/>
 		<title>Create Your Own TeamHooman Badge</title>
 		<link rel="shortcut icon" href="gandsHoomans.png"/>
-		<link href='http://fonts.googleapis.com/css?family=VT323|Press+Start+2P' rel='stylesheet' type='text/css'/>
+		<link href='http://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'/>
 		<style type="text/css">
 		body {
 			background: #f0f0f0;
@@ -14,7 +15,7 @@
 		}
 		#badge_form {
 			text-align: center;
-			max-width: 800px;
+			max-width: 640px;
 			margin: auto;
 		}
 		.show-border canvas {
@@ -26,7 +27,7 @@
 			border: 1px solid transparent;
 		}
 		#force_font {
-			font-family: 'VT323';
+			font-family: 'Press Start 2P';
 			overflow: hidden;
 			color: transparent;
 			height: 0;
@@ -77,8 +78,9 @@
 				placeholder="example.com or @twitteruser or mail@example.com or Twitch_user"
 				title="example.com or @twitteruser or mail@example.com or Twitch_user"/>
 
+			<label title="QR code of link">
 			<input id="qrcode" type="checkbox" checked/>
-			<label for="qrcode">qrcode</label>
+			QR code</label>
 			<br/>
 
 			<label for="format">Format:</label>
@@ -89,8 +91,9 @@
 				<option value="75x40">75 &times; 40 mm</option>
 			</select>
 			
-			<label for="dpi">DPI:</label>
+			<label title="DPI of PNG and print-out">DPI:
 			<input id="dpi" type="number" min="1" step="1" value="200" />
+			</label>
 
 			<input id="background" type="checkbox" checked/>
 			<label for="background">background</label>

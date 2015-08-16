@@ -216,24 +216,9 @@ function drawBadge (canvas, options) {
 		outlineText(ctx, options.link, unMid, lnkTop, unWidth);
 		
 		if (options.qrcode) {
-			var url = options.link;
-			if (!/^[_a-z][-_a-z0-9]*:/i.test(url)) {
-				if (/^@/.test(url)) {
-					url = 'https://twitter.com/'+url.substring(1);
-				}
-				else if (/^[^\/@\s:]+@[^\/@\s:]+$/.test(url)) {
-					url = 'mailto:'+url;
-				}
-				else if (/^[a-z0-9]\w+$/i.test(url)) {
-					url = 'http://www.twitch.tv/'+url;
-				}
-				else {
-					url = 'http://'+url;
-				}
-			}
-			ctx.imageSmoothingEnabled = true;
+			ctx.imageSmoothingEnabled = false;
 			$(canvas).qrcode({
-				text: url,
+				text: autoUrl(options.link),
 				size: qrSize,
 				left: pixWidth  - qrSize - qrMargin,
 				top:  pixHeight - qrSize - qrMargin,
@@ -241,6 +226,24 @@ function drawBadge (canvas, options) {
 			});
 		}
 	}
+}
+
+function autoUrl (url) {
+	if (!/^[_a-z][-_a-z0-9]*:/i.test(url)) {
+		if (/^@/.test(url)) {
+			return 'https://twitter.com/'+url.substring(1);
+		}
+		else if (/^[^\/@\s:]+@[^\/@\s:]+$/.test(url)) {
+			return 'mailto:'+url;
+		}
+		else if (/^[a-z0-9]\w+$/i.test(url)) {
+			return 'http://www.twitch.tv/'+url;
+		}
+		else {
+			return 'http://'+url;
+		}
+	}
+	return url;
 }
 
 function outlineText (ctx, text, x, y, maxWidth) {
