@@ -84,7 +84,7 @@ Loader.prototype = {
 
 var loader = new Loader();
 loader.load("document", document);
-loader.load("gandsHoomans", "gandsHoomans.png");
+loader.load("racoon", "img/racoon.png");
 loader.ready(updatePreview);
 
 function getPixelsPerUnit (unit) {
@@ -154,25 +154,26 @@ function drawBadge (canvas, options) {
 	ctx.fillStyle   = '#FFF000';
 	ctx.strokeStyle = '#000000';
 
-	var img = loader.get("gandsHoomans");
-	var imgSize, imgTop, hSize, hTop, hWidth;
+	var img = loader.get("racoon");
+	var imgHeight, imgTop, hSize, hTop, hWidth;
 	var qrSize, qrMargin;
 	var unMid, unWidth, unSize, lnkSize, unLine, lnkLine, unTop, lnkTop;
 
 	if (options.link || options.username) {
-		imgSize = pixHeight * 0.3;
-		imgTop  = pixHeight * 0.05;
-		hSize   = pixHeight * 0.15;
-		hWidth  = pixWidth  * 0.7;
-		hTop    = pixHeight * 0.34;
+		imgHeight = pixHeight * 0.25;
+		imgTop    = pixHeight * 0.098;
+		hSize     = pixHeight * 0.15;
+		hWidth    = pixWidth  * 0.7;
+		hTop      = pixHeight * 0.34;
 	}
 	else {
-		imgSize = pixHeight * 0.45;
-		imgTop  = pixHeight * 0.14;
-		hSize   = pixHeight * 0.2;
-		hWidth  = pixWidth  * 0.9;
-		hTop    = pixHeight * 0.55;
+		imgHeight = pixHeight * 0.32;
+		imgTop    = pixHeight * 0.22;
+		hSize     = pixHeight * 0.2;
+		hWidth    = pixWidth  * 0.9;
+		hTop      = pixHeight * 0.52;
 	}
+	var imgWidth = imgHeight * img.width / img.height;
 
 	if (options.link && options.qrcode) {
 		qrSize   = Math.round(pixHeight * 0.4);
@@ -202,7 +203,7 @@ function drawBadge (canvas, options) {
 	ctx.lineWidth = Math.round(pixHeight * 0.04);
 	outlineText(ctx, '#TEAMHOOMAN', pixWidth / 2, hTop, hWidth);
 
-	ctx.drawImage(img, pixWidth / 2 - imgSize / 2, imgTop, imgSize, imgSize);
+	ctx.drawImage(img, pixWidth / 2 - imgWidth / 2, imgTop, imgWidth, imgHeight);
 
 	if (options.username) {
 		ctx.font = unSize + 'px "Press Start 2P"';
