@@ -151,14 +151,26 @@ function drawBadge (canvas, options) {
 	ctx.fillStyle   = '#FFF000';
 	ctx.strokeStyle = '#000000';
 
-	ctx.font = (pixHeight * 0.14) + 'px "Press Start 2P"';
-	ctx.lineWidth = Math.round(pixHeight * 0.04);
-	outlineText(ctx, '#TEAMHOOMAN', pixWidth / 2, pixHeight * 0.34, pixWidth * 0.7);
-
 	var img = loader.get("gandsHoomans");
-	var imgSize = pixHeight * 0.3;
+	var imgSize, imgTop, hSize, hTop, hWidth;
 	var qrSize, qrMargin;
 	var unMid, unWidth, unSize, lnkSize, unLine, lnkLine, unTop, lnkTop;
+
+	if (options.link || options.username) {
+		imgSize = pixHeight * 0.3;
+		imgTop  = pixHeight * 0.05;
+		hSize   = pixHeight * 0.15;
+		hWidth  = pixWidth  * 0.7;
+		hTop    = pixHeight * 0.34;
+	}
+	else {
+		imgSize = pixHeight * 0.45;
+		imgTop  = pixHeight * 0.14;
+		hSize   = pixHeight * 0.2;
+		hWidth  = pixWidth  * 0.9;
+		hTop    = pixHeight * 0.55;
+	}
+
 	if (options.link && options.qrcode) {
 		qrSize   = Math.round(pixHeight * 0.4);
 		qrMargin = pixHeight * 0.05;
@@ -166,27 +178,34 @@ function drawBadge (canvas, options) {
 		unMid    = availWidth / 2;
 		unWidth  = availWidth * 0.9;
 		unSize   = pixHeight * 0.06;
-		lnkSize  = pixHeight * 0.05;
+		lnkSize  = pixHeight * (options.username ? 0.05 : 0.06);
 		unLine   = pixHeight * 0.025;
 		lnkLine  = pixHeight * 0.02;
 		unTop    = pixHeight * 0.65;
-		lnkTop   = pixHeight * 0.77;
+		lnkTop   = pixHeight * (options.username ? 0.77 : 0.7);
 	}
 	else {
 		unMid   = pixWidth / 2;
 		unWidth = pixWidth * 0.9;
 		unSize  = pixHeight * 0.1;
-		lnkSize = pixHeight * 0.06;
+		lnkSize = pixHeight * (options.username ? 0.06 : 0.1);
 		unLine  = pixHeight * 0.03;
 		lnkLine = pixHeight * 0.025;
 		unTop   = pixHeight * (options.link ? 0.6 : 0.7);
-		lnkTop  = pixHeight * 0.78;
+		lnkTop  = pixHeight * (options.username ? 0.78 : 0.7);
 	}
-	ctx.drawImage(img, pixWidth / 2 - imgSize / 2, pixHeight * 0.05, imgSize, imgSize);
 
-	ctx.font = unSize + 'px "Press Start 2P"';
-	ctx.lineWidth = unLine;
-	outlineText(ctx, options.username, unMid, unTop, unWidth);
+	ctx.font = hSize + 'px "Press Start 2P"';
+	ctx.lineWidth = Math.round(pixHeight * 0.04);
+	outlineText(ctx, '#TEAMHOOMAN', pixWidth / 2, hTop, hWidth);
+
+	ctx.drawImage(img, pixWidth / 2 - imgSize / 2, imgTop, imgSize, imgSize);
+
+	if (options.username) {
+		ctx.font = unSize + 'px "Press Start 2P"';
+		ctx.lineWidth = unLine;
+		outlineText(ctx, options.username, unMid, unTop, unWidth);
+	}
 
 	if (options.link) {
 		ctx.font = lnkSize + 'px "Press Start 2P"';
