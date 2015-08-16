@@ -101,6 +101,9 @@ function getPixelsPerUnit (unit) {
 	document.body.appendChild(elem);
 	var pixels = elem.offsetHeight;
 	document.body.removeChild(elem);
+	if (window.devicePixelRatio) {
+		pixels *= window.devicePixelRatio;
+	}
 	return pixels;
 }
 
@@ -256,19 +259,28 @@ function equalState (s1, s2) {
 	       s1.qrcode === s2.qrcode;
 }
 
+function _updatePreview (params) {
+	var $canvas = $('#preview_badge');
+	drawBadge($canvas[0], $.extend({dpmm: getPixelsPerUnit('mm')}, params));
+
+	if (params.border) {
+		$(document.body).addClass('show-border');
+	}
+	else {
+		$(document.body).removeClass('show-border');
+	}
+
+	$canvas.css({
+		width:  params.width+'mm',
+		height: params.height+'mm'
+	});
+}
+
 function updatePreview (forceUpdate) {
 	var params = getBadgeParams();
 	var changed = !equalState(params, lastState);
 	if (changed || forceUpdate) {
-		var canvas = $('#preview_badge')[0];
-		drawBadge(canvas, $.extend({dpmm: getPixelsPerUnit('mm')}, params));
-
-		if (params.border) {
-			$(document.body).addClass('show-border');
-		}
-		else {
-			$(document.body).removeClass('show-border');
-		}
+		_updatePreview(params);
 
 		if (changed && history.pushState) {
 			history.pushState(params, document.title, "?"+$.param({
@@ -386,7 +398,6 @@ $(window).on('popstate', function (event) {
 	$("#border").prop('checked', 'border' in params ? parseBool(params.border) : true);
 	$("#background").prop('checked', 'background' in params ? parseBool(params.background) : true);
 	$("#qrcode").prop('checked', 'qrcode' in params ? parseBool(params.qrcode) : true);
-	
-	var canvas = $('#preview_badge')[0];
-	drawBadge(canvas, $.extend({dpmm: getPixelsPerUnit('mm')}, params));
+
+	_updatePreview(params);
 });
