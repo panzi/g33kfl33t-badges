@@ -1,3 +1,9 @@
+if (!String.prototype.trim) {
+	String.prototype.trim = function () {
+		return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+	};
+}
+
 function Loader () {
 	this._resources = {};
 	this._callbacks = [];
@@ -103,7 +109,8 @@ function getBadgeParams () {
 
 	return {
 		username:   $('#username').val(),
-		link:       $('#link').val(),
+		link:       $('#link').val().trim(),
+		qrcode:     $('#qrcode').prop('checked'),
 		border:     $('#border').prop('checked'),
 		background: $('#background').prop('checked'),
 		width:      parseInt(format[0], 10),
@@ -123,6 +130,7 @@ function drawBadge (canvas, options) {
 
 	var ctx = canvas.getContext("2d");
 
+	ctx.imageSmoothingEnabled = true;
 	if (options.background) {
 		var gradient = ctx.createRadialGradient(pixWidth/2, 0, 0, pixWidth/2, 0, pixHeight);
 		gradient.addColorStop(0,"white");
@@ -135,7 +143,6 @@ function drawBadge (canvas, options) {
 		ctx.fillRect(0, 0, pixWidth, pixHeight);
 	}
 
-//	ctx.imageSmoothingEnabled = false;
 	ctx.lineCap = 'square';
 	ctx.lineJoin = 'miter';
 	ctx.textBaseline = 'top';
@@ -145,23 +152,69 @@ function drawBadge (canvas, options) {
 	ctx.strokeStyle = '#000000';
 
 	ctx.font = (pixHeight * 0.14) + 'px "Press Start 2P"';
-	ctx.lineWidth = Math.round(pixHeight * 0.05);
+	ctx.lineWidth = Math.round(pixHeight * 0.04);
 	outlineText(ctx, '#TEAMHOOMAN', pixWidth / 2, pixHeight * 0.34, pixWidth * 0.7);
 
 	var img = loader.get("gandsHoomans");
 	var imgSize = pixHeight * 0.3;
-//	ctx.imageSmoothingEnabled = true;
+	var qrSize, qrMargin;
+	var unMid, unWidth, unSize, lnkSize, unLine, lnkLine, unTop, lnkTop;
+	if (options.link && options.qrcode) {
+		qrSize   = Math.round(pixHeight * 0.4);
+		qrMargin = pixHeight * 0.05;
+		var availWidth = pixWidth - qrMargin - qrSize;
+		unMid    = availWidth / 2;
+		unWidth  = availWidth * 0.9;
+		unSize   = pixHeight * 0.06;
+		lnkSize  = pixHeight * 0.05;
+		unLine   = pixHeight * 0.025;
+		lnkLine  = pixHeight * 0.02;
+		unTop    = pixHeight * 0.65;
+		lnkTop   = pixHeight * 0.77;
+	}
+	else {
+		unMid   = pixWidth / 2;
+		unWidth = pixWidth * 0.9;
+		unSize  = pixHeight * 0.1;
+		lnkSize = pixHeight * 0.06;
+		unLine  = pixHeight * 0.03;
+		lnkLine = pixHeight * 0.025;
+		unTop   = pixHeight * (options.link ? 0.6 : 0.7);
+		lnkTop  = pixHeight * 0.78;
+	}
 	ctx.drawImage(img, pixWidth / 2 - imgSize / 2, pixHeight * 0.05, imgSize, imgSize);
-//	ctx.imageSmoothingEnabled = false;
 
-	ctx.font = (pixHeight * 0.1) + 'px "Press Start 2P"';
-	ctx.lineWidth = Math.round(pixHeight * 0.03);
-	outlineText(ctx, options.username, pixWidth / 2, pixHeight * (options.link ? 0.6 : 0.7), pixWidth * 0.9);
+	ctx.font = unSize + 'px "Press Start 2P"';
+	ctx.lineWidth = unLine;
+	outlineText(ctx, options.username, unMid, unTop, unWidth);
 
 	if (options.link) {
-		ctx.font = (pixHeight * 0.06) + 'px "Press Start 2P"';
-		ctx.lineWidth = Math.round(pixHeight * 0.025);
-		outlineText(ctx, options.link, pixWidth / 2, pixHeight * 0.78, pixWidth * 0.9);
+		ctx.font = lnkSize + 'px "Press Start 2P"';
+		ctx.lineWidth = lnkLine;
+		outlineText(ctx, options.link, unMid, lnkTop, unWidth);
+		
+		if (options.qrcode) {
+			var url = options.link;
+			if (!/^[_a-z][-_a-z0-9]*:/i.test(url)) {
+				if (/^@/.test(url)) {
+					url = 'https://twitter.com/'+url.substring(1);
+				}
+				else if (/^[^\/@\s:]+@[^\/@\s:]+$/.test(url)) {
+					url = 'mailto:'+url;
+				}
+				else {
+					url = 'http://'+url;
+				}
+			}
+			ctx.imageSmoothingEnabled = true;
+			$(canvas).qrcode({
+				text: url,
+				size: qrSize,
+				left: pixWidth  - qrSize - qrMargin,
+				top:  pixHeight - qrSize - qrMargin,
+				background: '#FFFFFF'
+			});
+		}
 	}
 }
 
@@ -177,7 +230,8 @@ function equalState (s1, s2) {
 	       s1.height === s2.height &&
 	       s1.border === s2.border &&
 	       s1.background === s2.background &&
-	       s1.link === s2.link;
+	       s1.link === s2.link &&
+	       s1.qrcode === s2.qrcode;
 }
 
 function updatePreview (forceUpdate) {
@@ -198,6 +252,7 @@ function updatePreview (forceUpdate) {
 			history.pushState(params, document.title, "?"+$.param({
 				username:   params.username,
 				link:       params.link,
+				qrcode:     params.qrcode,
 				dpi:        params.dpi,
 				format:     params.width + 'x' + params.height,
 				border:     params.border,
@@ -281,15 +336,17 @@ function parseBool (val) {
 $(document).ready(function ($) {
 	var params = parseParams(location.search.replace(/^\?/,''));
 
+	params.link = (params.link||'').trim();
 	$("#badge_form").submit(downloadBadge);
-	
+
 	$("#username").val(params.username||'').on('keyup cut paste drop', defer(updatePreview));
 	$("#link").val(params.link||'').on('keyup cut paste drop', defer(updatePreview));
-	$("#username, #format, #dpi, #border, #background").change(updatePreview);
+	$("#username, #format, #dpi, #border, #background, #qrcode").change(updatePreview);
 	if (params.format) $("#format").val(params.format);
 	if (params.dpi) $("#dpi").val(params.dpi);
 	$("#border").prop('checked', 'border' in params ? parseBool(params.border) : true);
-	$("#background").prop('checked', 'border' in params ? parseBool(params.background) : true);
+	$("#background").prop('checked', 'background' in params ? parseBool(params.background) : true);
+	$("#qrcode").prop('checked', 'qrcode' in params ? parseBool(params.qrcode) : true);
 });
 
 $(window).on('popstate', function (event) {
@@ -297,13 +354,16 @@ $(window).on('popstate', function (event) {
 	if (!params) {
 		params = parseParams(location.search.replace(/^\?/,''));
 	}
+	params.link = (params.link||'').trim();
+
 	$("#username").val(params.username||'');
 	$("#link").val(params.link||'');
 	var $format = $("#format").val(params.width + 'x' + params.height);
 	if (!$format.val()) $format.val('105x74');
 	$("#dpi").val(params.dpi||200);
 	$("#border").prop('checked', 'border' in params ? parseBool(params.border) : true);
-	$("#background").prop('checked', 'border' in params ? parseBool(params.background) : true);
+	$("#background").prop('checked', 'background' in params ? parseBool(params.background) : true);
+	$("#qrcode").prop('checked', 'qrcode' in params ? parseBool(params.qrcode) : true);
 	
 	var canvas = $('#preview_badge')[0];
 	drawBadge(canvas, $.extend({dpmm: getPixelsPerUnit('mm')}, params));

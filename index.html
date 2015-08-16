@@ -64,6 +64,7 @@
 		}
 		</style>
 		<script type="text/javascript" src="jquery-2.1.4.min.js"></script>
+		<script type="text/javascript" src="jquery.qrcode-0.12.0.min.js"></script>
 		<script type="text/javascript" src="badge.js"></script>
 	</head>
 	<body onload="updatePreview(true);" class="show-border">
@@ -75,7 +76,13 @@
 			<input type="text" id="username" placeholder="(User-)Name" autofocus/>
 			
 			<label for="link">Link <span class="optional">(optional)</span>:</label>
-			<input type="text" id="link" placeholder="example.com"/>
+			<input type="text" id="link"
+				placeholder="example.com or @twitteruser or mail@example.com"
+				title="example.com or @twitteruser or mail@example.com"/>
+
+			<input id="qrcode" type="checkbox" checked/>
+			<label for="qrcode">qrcode</label>
+			<br/>
 
 			<label for="format">Format:</label>
 			<select id="format">
@@ -90,6 +97,7 @@
 
 			<input id="background" type="checkbox" checked/>
 			<label for="background">background</label>
+			<br/>
 
 			<button type="submit">Save as PNG</button>
 
