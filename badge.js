@@ -202,6 +202,9 @@ function drawBadge (canvas, options) {
 				else if (/^[^\/@\s:]+@[^\/@\s:]+$/.test(url)) {
 					url = 'mailto:'+url;
 				}
+				else if (/^[a-z0-9]\w+$/i.test(url)) {
+					url = 'http://www.twitch.tv/'+url;
+				}
 				else {
 					url = 'http://'+url;
 				}
@@ -306,7 +309,7 @@ function parseParams (qs) {
 		var qs = qs.split("&");
 		for (var i = 0; i < qs.length; ++ i) {
 			var p = qs[i].split("=");
-			params[decodeURIComponent(p[0])] = decodeURIComponent(p.slice(1).join("="));
+			params[decodeURIComponent(p[0].replace(/\+/g,' '))] = decodeURIComponent(p.slice(1).join("=").replace(/\+/g,' '));
 		}
 	}
 	return params;
