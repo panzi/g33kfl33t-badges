@@ -286,7 +286,7 @@ function updatePreview (forceUpdate) {
 		_updatePreview(params);
 
 		if (changed && history.pushState) {
-			history.pushState(params, document.title, "?"+$.param({
+			history.pushState(params, document.title, location.pathname+"?"+$.param({
 				username:   params.username,
 				link:       params.link,
 				qrcode:     params.qrcode,
@@ -366,7 +366,8 @@ function parseBool (val) {
 		return val;
 	}
 	else {
-		return val.toLowerCase() === "true";
+		// for /?foo=true some browsers sometimes "fix" the url to /?foo=true/
+		return val.toLowerCase().replace(/\/+$/,'') === "true";
 	}
 }
 
