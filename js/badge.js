@@ -84,7 +84,7 @@ Loader.prototype = {
 
 var loader = new Loader();
 loader.load("document", document);
-loader.load("raccoon", "img/raccoon.png");
+loader.load("bgimg", "img/bgimg.png");
 loader.ready(updatePreview);
 
 function getPixelsPerUnit (unit) {
@@ -115,7 +115,6 @@ function getBadgeParams () {
 		link:       $('#link').val().trim(),
 		qrcode:     $('#qrcode').prop('checked'),
 		border:     $('#border').prop('checked'),
-		background: $('#background').prop('checked'),
 		width:      parseInt(format[0], 10),
 		height:     parseInt(format[1], 10),
 		dpi:        parseInt($('#dpi').val(), 10)
@@ -134,98 +133,75 @@ function drawBadge (canvas, options) {
 	var ctx = canvas.getContext("2d");
 
 	ctx.imageSmoothingEnabled = true;
-	if (options.background) {
-		var gradient = ctx.createRadialGradient(pixWidth/2, 0, 0, pixWidth/2, 0, pixHeight);
-		gradient.addColorStop(0,"white");
-		gradient.addColorStop(1,"#ADF0FF");
-		ctx.fillStyle = gradient;
-		ctx.fillRect(0,0,pixWidth,pixWidth);
-	}
-	else {
-		ctx.fillStyle = '#FFFFFF';
-		ctx.fillRect(0, 0, pixWidth, pixHeight);
-	}
 
 	ctx.lineCap = 'square';
 	ctx.lineJoin = 'miter';
 	ctx.textBaseline = 'top';
-	ctx.textAlign = "center";
+	ctx.textAlign = "right";
 
-	ctx.fillStyle   = '#FFF000';
-	ctx.strokeStyle = '#000000';
+	var img = loader.get("bgimg");
+	var imgAspect   = img.width / img.height;
+	var badgeAspect = width / height;
+	var qrSize      = Math.round(pixHeight * 0.3);
+	var margin      = pixHeight * 0.05;
+	var imgWidth, imgHeight, unSize, lnkSize, unTop, lnkTop, txtX;
 
-	var img = loader.get("raccoon");
-	var imgHeight, imgTop, hSize, hTop, hWidth;
-	var qrSize, qrMargin;
-	var unMid, unWidth, unSize, lnkSize, unLine, lnkLine, unTop, lnkTop;
-
-	if (options.link || options.username) {
-		imgHeight = pixHeight * 0.25;
-		imgTop    = pixHeight * 0.098;
-		hSize     = pixHeight * 0.15;
-		hWidth    = pixWidth  * 0.7;
-		hTop      = pixHeight * 0.34;
+	if (imgAspect < badgeAspect) {
+		imgWidth  = pixWidth;
+		imgHeight = pixWidth / imgAspect;
 	}
 	else {
-		imgHeight = pixHeight * 0.32;
-		imgTop    = pixHeight * 0.22;
-		hSize     = pixHeight * 0.2;
-		hWidth    = pixWidth  * 0.9;
-		hTop      = pixHeight * 0.52;
-	}
-	var imgWidth = imgHeight * img.width / img.height;
-
-	if (options.link && options.qrcode) {
-		qrSize   = Math.round(pixHeight * 0.4);
-		qrMargin = pixHeight * 0.05;
-		var availWidth = pixWidth - qrMargin - qrSize;
-		unMid    = availWidth / 2;
-		unWidth  = availWidth * 0.9;
-		unSize   = pixHeight * 0.06;
-		lnkSize  = pixHeight * (options.username ? 0.05 : 0.06);
-		unLine   = pixHeight * 0.025;
-		lnkLine  = pixHeight * 0.02;
-		unTop    = pixHeight * 0.68;
-		lnkTop   = pixHeight * (options.username ? 0.8 : 0.72);
-	}
-	else {
-		unMid   = pixWidth / 2;
-		unWidth = pixWidth * 0.9;
-		unSize  = pixHeight * 0.1;
-		lnkSize = pixHeight * (options.username ? 0.06 : 0.1);
-		unLine  = pixHeight * 0.03;
-		lnkLine = pixHeight * 0.025;
-		unTop   = pixHeight * (options.link ? 0.6 : 0.7);
-		lnkTop  = pixHeight * (options.username ? 0.78 : 0.7);
+		imgWidth  = pixHeight * imgAspect;
+		imgHeight = pixHeight;
 	}
 
-	ctx.font = hSize + 'px "Press Start 2P"';
-	ctx.lineWidth = Math.round(pixHeight * 0.04);
-	outlineText(ctx, '#TEAMHOOMAN', pixWidth / 2, hTop, hWidth);
-
-	ctx.drawImage(img, pixWidth / 2 - imgWidth / 2, imgTop, imgWidth, imgHeight);
+	var txtX     = pixWidth * 0.4;
+	var txtWidth = txtX - margin;
+	var unSize   = pixHeight * 0.1;
+	var lnkSize  = pixHeight * (options.username ? 0.06 : 0.1);
+	var unTop    = pixHeight * (options.link     ? 0.55 : 0.6);
+	var lnkTop   = pixHeight * (options.username ? 0.7  : 0.6);
+	var shadowOffset = pixHeight * 0.002;
+	var textStyle    = '#FFFFFF';
+	var shadowStyle  = 'rgba(0,0,0,0.5)';
+	var actualTxtWidth = 0;
 
 	if (options.username) {
-		ctx.font = unSize + 'px "Press Start 2P"';
-		ctx.lineWidth = unLine;
-		outlineText(ctx, options.username, unMid, unTop, unWidth);
+		ctx.font = unSize + 'px "Hamburger Heaven"';
+		actualTxtWidth = ctx.measureText(options.username).width;
+	}
+	
+	if (options.username) {
+		ctx.font = lnkSize + 'px "Hamburger Heaven"';
+		actualTxtWidth = Math.max(actualTxtWidth, ctx.measureText(options.link).width);
+	}
+
+	if (actualTxtWidth > txtWidth) {
+		txtX     = Math.min(margin + actualTxtWidth, options.qrcode ? pixWidth - qrSize - margin * 2 : pixWidth - margin);
+		txtWidth = txtX - margin;
+	}
+
+	ctx.drawImage(img, pixWidth / 2 - imgWidth / 2, pixHeight / 2 - imgHeight / 2, imgWidth, imgHeight);
+
+	if (options.username) {
+		ctx.font = unSize + 'px "Hamburger Heaven"';
+		shadowText(ctx, options.username, txtX, unTop, shadowOffset, txtWidth, textStyle, shadowStyle);
 	}
 
 	if (options.link) {
-		ctx.font = lnkSize + 'px "Press Start 2P"';
-		ctx.lineWidth = lnkLine;
-		outlineText(ctx, options.link, unMid, lnkTop, unWidth);
-		
-		if (options.qrcode) {
-			ctx.imageSmoothingEnabled = false;
-			$(canvas).qrcode({
-				text: autoUrl(options.link),
-				size: qrSize,
-				left: pixWidth  - qrSize - qrMargin,
-				top:  pixHeight - qrSize - qrMargin,
-				background: '#FFFFFF'
-			});
-		}
+		ctx.font = lnkSize + 'px "Hamburger Heaven"';
+		shadowText(ctx, options.link, txtX, lnkTop, shadowOffset, txtWidth, textStyle, shadowStyle);
+	}
+
+	if (options.qrcode) {
+		ctx.imageSmoothingEnabled = false;
+		$(canvas).qrcode({
+			text: autoUrl(options.link || 'http://www.thegeekfleet.com/'),
+			size: qrSize,
+			left: pixWidth  - qrSize - margin,
+			top:  pixHeight * 0.52,
+			background: '#FFFFFF'
+		});
 	}
 }
 
@@ -247,8 +223,11 @@ function autoUrl (url) {
 	return url;
 }
 
-function outlineText (ctx, text, x, y, maxWidth) {
-	ctx.strokeText(text, x, y, maxWidth);
+function shadowText (ctx, text, x, y, shadowOffset, maxWidth, textStyle, shadowStyle) {
+	ctx.fillStyle = shadowStyle;
+	ctx.fillText(text, x + shadowOffset, y + shadowOffset, maxWidth);
+
+	ctx.fillStyle = textStyle;
 	ctx.fillText(text, x, y, maxWidth);
 }
 
@@ -258,7 +237,6 @@ function equalState (s1, s2) {
 	       s1.width  === s2.width &&
 	       s1.height === s2.height &&
 	       s1.border === s2.border &&
-	       s1.background === s2.background &&
 	       s1.link === s2.link &&
 	       s1.qrcode === s2.qrcode;
 }
@@ -293,8 +271,7 @@ function updatePreview (forceUpdate) {
 				qrcode:     params.qrcode,
 				dpi:        params.dpi,
 				format:     params.width + 'x' + params.height,
-				border:     params.border,
-				background: params.background
+				border:     params.border
 			}));
 		}
 	}
@@ -307,7 +284,7 @@ var MM_PER_INCH = 25.4;
 function downloadBadge () {
 	var params = getBadgeParams();
 	var canvas = document.createElement("canvas");
-	var filename = "teamhooman_badge.png";
+	var filename = "g33kfl33t_badge.png";
 	var fileformat = "image/png";
 	drawBadge(canvas, $.extend({dpmm: params.dpi / MM_PER_INCH}, params));
 	saveCanvas(canvas, filename, fileformat);
@@ -446,11 +423,10 @@ $(document).ready(function ($) {
 
 	$("#username").val(params.username||'').on('keyup cut paste drop', defer(updatePreview));
 	$("#link").val(params.link||'').on('keyup cut paste drop', defer(updatePreview));
-	$("#username, #format, #dpi, #border, #background, #qrcode").change(updatePreview);
+	$("#username, #format, #dpi, #border, #qrcode").change(updatePreview);
 	if (params.format) $("#format").val(params.format);
 	if (params.dpi) $("#dpi").val(params.dpi);
 	$("#border").prop('checked', 'border' in params ? parseBool(params.border) : true);
-	$("#background").prop('checked', 'background' in params ? parseBool(params.background) : true);
 	$("#qrcode").prop('checked', 'qrcode' in params ? parseBool(params.qrcode) : true);
 });
 
@@ -467,7 +443,6 @@ $(window).on('popstate', function (event) {
 	if (!$format.val()) $format.val('105x74');
 	$("#dpi").val(params.dpi||200);
 	$("#border").prop('checked', 'border' in params ? parseBool(params.border) : true);
-	$("#background").prop('checked', 'background' in params ? parseBool(params.background) : true);
 	$("#qrcode").prop('checked', 'qrcode' in params ? parseBool(params.qrcode) : true);
 
 	_updatePreview(params);
