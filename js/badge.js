@@ -185,8 +185,8 @@ function drawBadge (canvas, options) {
 		lnkSize  = pixHeight * (options.username ? 0.05 : 0.06);
 		unLine   = pixHeight * 0.025;
 		lnkLine  = pixHeight * 0.02;
-		unTop    = pixHeight * 0.65;
-		lnkTop   = pixHeight * (options.username ? 0.77 : 0.7);
+		unTop    = pixHeight * 0.68;
+		lnkTop   = pixHeight * (options.username ? 0.8 : 0.72);
 	}
 	else {
 		unMid   = pixWidth / 2;
