@@ -307,26 +307,82 @@ var MM_PER_INCH = 25.4;
 function downloadBadge () {
 	var params = getBadgeParams();
 	var canvas = document.createElement("canvas");
-	var link = document.createElement("a");
-	link.download = "teamhooman_badge.png";
+	var filename = "teamhooman_badge.png";
+	var fileformat = "image/png";
 	drawBadge(canvas, $.extend({dpmm: params.dpi / MM_PER_INCH}, params));
+	saveCanvas(canvas, filename, fileformat);
+}
 
-	if (canvas.toBlob) {
-		canvas.toBlob(function (blob) {
-			var URL = window.URL || window.webkitURL;
-			var url = URL.createObjectURL(blob);
+window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
+window.saveAs = window.saveAs || window.webkitSaveAs || window.mozSaveAs || window.msSaveAs;
 
-			link.href = url;
-			link.click();
-
-			setTimeout(function () {
-				URL.revokeObjectURL(url);
-			}, 250);
-		});
+function saveCanvas (canvas, filename, fileformat) {
+	if (navigator.msSaveBlob || window.URL || window.saveAs) {
+		if (canvas.toBlob) {
+			canvas.toBlob(function (blob) {
+				saveBlob(blob, filename);
+			}, fileformat);
+		}
+		else {
+			saveBlob(dataURLToBlob(canvas.toDataURL(fileformat)), filename);
+		}
 	}
 	else {
-		link.href = canvas.toDataURL();
+		saveUrl(canvas.toDataURL(fileformat), filename);
+	}
+}
+
+function dataURLToBlob (dataURL) {
+	var index = dataURL.indexOf(',');
+	var meta = dataURL.substring(0, index);
+	var data = dataURL.substring(index + 1);
+	var contentType = meta.substring(meta.indexOf(':') + 1);
+
+	if (/;base64$/.test(contentType)) {
+		contentType = contentType.substring(0, contentType.length - 7);
+		var strdata = atob(data);
+
+		data = new Uint8Array(strdata.length);
+
+		for (var i = 0; i < strdata.length; ++ i) {
+			data[i] = strdata.charCodeAt(i);
+		}
+	}
+	else {
+		data = decodeURIComponent(data);
+	}
+
+	return new Blob([data], {type: contentType});
+}
+
+function saveBlob (blob, filename) {
+	if (navigator.msSaveBlob) {
+		navigator.msSaveBlob(blob, filename);
+	}
+	else if (window.saveAs) {
+		window.saveAs(blob, filename);
+	}
+	else {
+		var url = window.URL.createObjectURL(blob);
+
+		saveUrl(url, filename);
+
+		setTimeout(function () {
+			window.URL.revokeObjectURL(url);
+		}, 250);
+	}
+}
+
+function saveUrl (url, filename) {
+	var link = document.createElement("a");
+	if ('download' in link) {
+		link.download = filename;
+		link.href = url;
 		link.click();
+	}
+	else {
+		// async callback -> window.open() will fail
+		window.location = url;
 	}
 }
 
