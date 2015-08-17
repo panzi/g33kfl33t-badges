@@ -111,7 +111,7 @@ function getBadgeParams () {
 	var format = $('#format').val().split('x');
 
 	return {
-		username:   $('#username').val(),
+		username:   $('#username').val().trim(),
 		link:       $('#link').val().trim(),
 		qrcode:     $('#qrcode').prop('checked'),
 		border:     $('#border').prop('checked'),
@@ -421,7 +421,7 @@ $(document).ready(function ($) {
 	params.link = (params.link||'').trim();
 	$("#badge_form").submit(downloadBadge);
 
-	$("#username").val(params.username||'').on('keyup cut paste drop', defer(updatePreview));
+	$("#username").val((params.username||'').trim()).on('keyup cut paste drop', defer(updatePreview));
 	$("#link").val(params.link||'').on('keyup cut paste drop', defer(updatePreview));
 	$("#username, #format, #dpi, #border, #qrcode").change(updatePreview);
 	if (params.format) $("#format").val(params.format);
@@ -437,7 +437,7 @@ $(window).on('popstate', function (event) {
 	}
 	params.link = (params.link||'').trim();
 
-	$("#username").val(params.username||'');
+	$("#username").val((params.username||'').trim());
 	$("#link").val(params.link||'');
 	var $format = $("#format").val(params.width + 'x' + params.height);
 	if (!$format.val()) $format.val('105x74');
