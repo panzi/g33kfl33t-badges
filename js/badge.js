@@ -378,7 +378,17 @@ function saveUrl (url, filename) {
 	if ('download' in link) {
 		link.download = filename;
 		link.href = url;
+		link.style.position = 'absolute';
+		link.style.left = '0';
+		link.style.top = '0';
+
+		// some browsers need it to be in the document
+		document.body.appendChild(link);
 		link.click();
+
+		setTimeout(function () {
+			document.body.removeChild(link);
+		}, 250);
 	}
 	else {
 		// async callback -> window.open() will fail
