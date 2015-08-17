@@ -91,15 +91,17 @@ function getPixelsPerUnit (unit) {
 	if (!unit) unit = "mm";
 	var elem = document.createElement("div");
 	elem.style.visibility = "hidden";
-	elem.style.width      = "1" + unit;
-	elem.style.height     = "1" + unit;
+	elem.style.width      = "100" + unit;
+	elem.style.height     = "100" + unit;
 	elem.style.border     = "none";
 	elem.style.padding    = "0";
 	elem.style.position   = "absolute";
 	elem.style.left       = "0";
 	elem.style.top        = "0";
 	document.body.appendChild(elem);
-	var pixels = elem.offsetHeight;
+	// offsetHeight is an integer, so to get a more precise
+	//  valueI use 100 units and then devide by 100
+	var pixels = elem.offsetHeight / 100;
 	document.body.removeChild(elem);
 	if (window.devicePixelRatio) {
 		pixels *= window.devicePixelRatio;
