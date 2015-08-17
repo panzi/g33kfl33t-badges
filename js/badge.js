@@ -109,16 +109,27 @@ function getPixelsPerUnit (unit) {
 	return pixels;
 }
 
+function parseSize (size) {
+	var m = /^(\d+(?:\.\d+)?)x(\d+(?:\.\d+)?)([a-z]*)$/.exec(size);
+
+	return {
+		width:  parseFloat(m[1]),
+		height: parseFloat(m[2]),
+		unit:   m[3]||'mm'
+	};
+}
+
 function getBadgeParams () {
-	var format = $('#format').val().split('x');
+	var size = parseSize($('#size').val());
 
 	return {
 		username:   $('#username').val().trim(),
 		link:       $('#link').val().trim(),
 		qrcode:     $('#qrcode').prop('checked'),
 		border:     $('#border').prop('checked'),
-		width:      parseInt(format[0], 10),
-		height:     parseInt(format[1], 10),
+		width:      size.width,
+		height:     size.height,
+		unit:       size.unit,
 		dpi:        parseInt($('#dpi').val(), 10)
 	};
 }
@@ -126,8 +137,8 @@ function getBadgeParams () {
 function drawBadge (canvas, options) {
 	var width     = options.width;
 	var height    = options.height;
-	var pixWidth  = Math.floor(width  * options.dpmm);
-	var pixHeight = Math.floor(height * options.dpmm);
+	var pixWidth  = Math.floor(width  * options.dpu);
+	var pixHeight = Math.floor(height * options.dpu);
 
 	canvas.width  = pixWidth;
 	canvas.height = pixHeight;
@@ -245,7 +256,7 @@ function equalState (s1, s2) {
 
 function _updatePreview (params) {
 	var $canvas = $('#preview_badge');
-	drawBadge($canvas[0], $.extend({dpmm: getPixelsPerUnit('mm')}, params));
+	drawBadge($canvas[0], $.extend({dpu: getPixelsPerUnit(params.unit)}, params));
 
 	if (params.border) {
 		$(document.body).addClass('show-border');
@@ -255,8 +266,8 @@ function _updatePreview (params) {
 	}
 
 	$canvas.css({
-		width:  params.width+'mm',
-		height: params.height+'mm'
+		width:  params.width+params.unit,
+		height: params.height+params.unit
 	});
 }
 
@@ -272,7 +283,7 @@ function updatePreview (forceUpdate) {
 				link:       params.link,
 				qrcode:     params.qrcode,
 				dpi:        params.dpi,
-				format:     params.width + 'x' + params.height,
+				size:       params.width + 'x' + params.height + params.unit,
 				border:     params.border
 			}));
 		}
@@ -281,14 +292,25 @@ function updatePreview (forceUpdate) {
 }
 
 var lastState = {username:'',dpi:200,width:105,height:74};
-var MM_PER_INCH = 25.4;
+
+var DPI_CONV = {
+	"mm": 25.4,
+	"cm":  2.54,
+	"in":  1,
+	"pt": 72,
+	"pc":  6
+};
+
+function dpiToUnit (dpi, unit) {
+	return dpi / DPI_CONV[unit];
+}
 
 function downloadBadge () {
 	var params = getBadgeParams();
 	var canvas = document.createElement("canvas");
 	var filename = "g33kfl33t_badge.png";
 	var fileformat = "image/png";
-	drawBadge(canvas, $.extend({dpmm: params.dpi / MM_PER_INCH}, params));
+	drawBadge(canvas, $.extend({dpu: dpiToUnit(params.dpi, params.unit)}, params));
 	saveCanvas(canvas, filename, fileformat);
 }
 
@@ -399,10 +421,10 @@ function printBadge () {
 	var params = getBadgeParams();
 	var $badge = $("#print_badge");
 	var canvas = $badge[0];
-	drawBadge(canvas, $.extend({dpmm: params.dpi / MM_PER_INCH}, params));
+	drawBadge(canvas, $.extend({dpu: dpiToUnit(params.dpi, params.unit)}, params));
 	$badge.css({
-		width:  params.width+'mm',
-		height: params.height+'mm'
+		width:  params.width+params.unit,
+		height: params.height+params.unit
 	});
 	window.print();
 }
@@ -425,8 +447,15 @@ $(document).ready(function ($) {
 
 	$("#username").val((params.username||'').trim()).on('keyup cut paste drop', defer(updatePreview));
 	$("#link").val(params.link||'').on('keyup cut paste drop', defer(updatePreview));
-	$("#username, #format, #dpi, #border, #qrcode").change(updatePreview);
-	if (params.format) $("#format").val(params.format);
+	$("#username, #size, #dpi, #border, #qrcode").change(updatePreview);
+	if (params.size) {
+		var $size = $("#size").val(params.size);
+		if (!$size.val()) {
+			var size = parseSize(params.size);
+			$('#custom_sizes').append($('<option>',{value: params.size}).text(size.width + ' × ' + size.height + ' ' + size.unit)).show();
+			$size.val(params.size);
+		}
+	}
 	if (params.dpi) $("#dpi").val(params.dpi);
 	$("#border").prop('checked', 'border' in params ? parseBool(params.border) : true);
 	$("#qrcode").prop('checked', 'qrcode' in params ? parseBool(params.qrcode) : true);
@@ -438,11 +467,12 @@ $(window).on('popstate', function (event) {
 		params = parseParams(location.search.replace(/^\?/,''));
 	}
 	params.link = (params.link||'').trim();
+	if (!params.unit) params.unit = 'mm';
 
 	$("#username").val((params.username||'').trim());
 	$("#link").val(params.link||'');
-	var $format = $("#format").val(params.width + 'x' + params.height);
-	if (!$format.val()) $format.val('105x74');
+	var $size = $("#size").val(params.width + 'x' + params.height + params.unit);
+	if (!$size.val()) $size.val('105x74mm');
 	$("#dpi").val(params.dpi||200);
 	$("#border").prop('checked', 'border' in params ? parseBool(params.border) : true);
 	$("#qrcode").prop('checked', 'qrcode' in params ? parseBool(params.qrcode) : true);

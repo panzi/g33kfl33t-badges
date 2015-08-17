@@ -43,6 +43,11 @@ input[type=number] {
 #print_badge {
 	display: none;
 }
+
+#size option {
+	text-align: right;
+	padding-right: 1em;
+}
 @media print {
 	body {
 		background: transparent;
