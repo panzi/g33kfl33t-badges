@@ -84,7 +84,7 @@ Loader.prototype = {
 
 var loader = new Loader();
 loader.load("document", document);
-loader.load("racoon", "img/racoon.png");
+loader.load("raccoon", "img/raccoon.png");
 loader.ready(updatePreview);
 
 function getPixelsPerUnit (unit) {
@@ -154,7 +154,7 @@ function drawBadge (canvas, options) {
 	ctx.fillStyle   = '#FFF000';
 	ctx.strokeStyle = '#000000';
 
-	var img = loader.get("racoon");
+	var img = loader.get("raccoon");
 	var imgHeight, imgTop, hSize, hTop, hWidth;
 	var qrSize, qrMargin;
 	var unMid, unWidth, unSize, lnkSize, unLine, lnkLine, unTop, lnkTop;
