@@ -33,8 +33,8 @@
 			<label for="size">Size:</label>
 			<select id="size">
 				<optgroup label="Metric">
-					<option value="150x100mm">150 &times; 100 mm</option>
-					<option value="105x74mm" selected>105 &times; 74 mm</option>
+					<option value="150x100mm" selected>150 &times; 100 mm</option>
+					<option value="105x74mm">105 &times; 74 mm</option>
 					<option value="90x58mm">90 &times; 58 mm</option>
 					<option value="85x54mm">85 &times; 54 mm</option>
 					<option value="75x40mm">75 &times; 40 mm</option>
@@ -44,9 +44,6 @@
 					<option value="4x3in">4'' &times; 3''</option>
 					<option value="3.75x3in">3 3/4'' &times; 3''</option>
 					<option value="3.5x2.25in">3 1/2'' &times; 2 1/4''</option>
-				</optgroup>
-
-				<optgroup label="Custom" id="custom_sizes" style="display:none;">
 				</optgroup>
 			</select>
 			
@@ -60,7 +57,7 @@
 
 			<button type="submit">Save as PNG</button>
 
-			<input id="border" type="checkbox" checked/>
+			<input id="border" type="checkbox"/>
 			<label for="border">show border</label>
 
 			<button type="button" onclick="printBadge(); return false;">Print</button>

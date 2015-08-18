@@ -50,7 +50,6 @@ input[type=number] {
 	}
 	#print_badge {
 		border-width: 0.5mm;
-		border-style: dashed;
 	}
 	#print_badge {
 		display: block;
