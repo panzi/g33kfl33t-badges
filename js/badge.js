@@ -110,7 +110,7 @@ function getPixelsPerUnit (unit) {
 }
 
 function parseSize (size) {
-	var m = /^(\d+(?:\.\d+)?)x(\d+(?:\.\d+)?)([a-z]*)$/.exec(size);
+	var m = /^(\d+(?:\.\d+)?)x(\d+(?:\.\d+)?)([a-z]*)\/?$/.exec(size);
 
 	return {
 		width:  parseFloat(m[1]),
@@ -291,7 +291,16 @@ function updatePreview (forceUpdate) {
 	lastState = params;
 }
 
-var lastState = {username:'',dpi:200,width:105,height:74};
+var lastState = {
+	username:'',
+	link:'',
+	dpi:200,
+	width:150,
+	height:100,
+	unit:'mm',
+	border:false,
+	qrcode:true
+};
 
 var DPI_CONV = {
 	"mm": 25.4,
@@ -439,45 +448,52 @@ function parseBool (val) {
 	}
 }
 
-$(document).ready(function ($) {
+function getBadgeParamsFromQuery () {
 	var params = parseParams(location.search.replace(/^\?/,''));
+	params.username   = (params.username||'').trim();
+	params.link       = (params.link||'').trim();
+	params.dpi        = parseInt(params.dpi||200,10);
+	params.qrcode     = 'qrcode'     in params ? parseBool(params.qrcode) : true;
+	params.border     = 'border'     in params ? parseBool(params.border) : false;
+	$.extend(params, parseSize(params.size||'150x100mm'));
+	delete params.size;
+	return params;
+}
 
-	params.link = (params.link||'').trim();
+function setBadgeFormData (params) {
+	$("#username").val(params.username);
+	$("#link").val(params.link);
+	var size = params.width + 'x' + params.height + params.unit;
+	var $size = $("#size").val(size);
+	if (!$size.val()) {
+		var $custom = $('#custom_sizes');
+		if ($custom.length === 0) {
+			$custom = $('<optgroup>',{label:'Custom',id:'custom_sizes'}).appendTo('#size');
+		}
+		$custom.append($('<option>',{value: size}).text(
+			params.unit === 'in' ?
+			params.width + "'' × " + params.height + "''" :
+			params.width + " × " + params.height + " " + params.unit));
+		$size.val(size);
+	}
+	$("#dpi").val(params.dpi);
+	$("#border").prop('checked', params.border);
+	$("#qrcode").prop('checked', params.qrcode);
+}
+
+$(document).ready(function ($) {
 	$("#badge_form").submit(downloadBadge);
 
-	$("#username").val((params.username||'').trim()).on('keyup cut paste drop', defer(updatePreview));
-	$("#link").val(params.link||'').on('keyup cut paste drop', defer(updatePreview));
-	$("#username, #size, #dpi, #border, #qrcode").change(updatePreview);
-	if (params.size) {
-		var $size = $("#size").val(params.size);
-		if (!$size.val()) {
-			var size = parseSize(params.size);
-			$('#custom_sizes').append($('<option>',{value: params.size}).text(size.width + ' × ' + size.height + ' ' + size.unit)).show();
-			$size.val(params.size);
-		}
+	$("#username, #link").on('keyup cut paste drop', defer(updatePreview));
+	$("#username, #link, #size, #dpi, #border, #qrcode").change(updatePreview);
+
+	if (location.search) {
+		setBadgeFormData(getBadgeParamsFromQuery());
 	}
-	if (params.dpi) $("#dpi").val(params.dpi);
-	$("#border").prop('checked', 'border' in params ? parseBool(params.border) : true);
-	$("#qrcode").prop('checked', 'qrcode' in params ? parseBool(params.qrcode) : true);
 });
 
 $(window).on('popstate', function (event) {
-	var params = event.originalEvent.state;
-	if (!params) {
-		params = parseParams(location.search.replace(/^\?/,''));
-		params.dpi = parseInt(params.dpi||200,10);
-		$.extend(params, parseSize(params.size||'105x74mm'));
-	}
-	params.link = (params.link||'').trim();
-	if (!params.unit) params.unit = 'mm';
-
-	$("#username").val((params.username||'').trim());
-	$("#link").val(params.link||'');
-	var $size = $("#size").val(params.width + 'x' + params.height + params.unit);
-	if (!$size.val()) $size.val('105x74mm');
-	$("#dpi").val(params.dpi||200);
-	$("#border").prop('checked', 'border' in params ? parseBool(params.border) : true);
-	$("#qrcode").prop('checked', 'qrcode' in params ? parseBool(params.qrcode) : true);
-
+	var params = event.originalEvent.state || getBadgeParamsFromQuery();
+	setBadgeFormData(params);
 	_updatePreview(params);
 });
