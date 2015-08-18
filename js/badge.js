@@ -465,6 +465,8 @@ $(window).on('popstate', function (event) {
 	var params = event.originalEvent.state;
 	if (!params) {
 		params = parseParams(location.search.replace(/^\?/,''));
+		params.dpi = parseInt(params.dpi||200,10);
+		$.extend(params, parseSize(params.size||'105x74mm'));
 	}
 	params.link = (params.link||'').trim();
 	if (!params.unit) params.unit = 'mm';
