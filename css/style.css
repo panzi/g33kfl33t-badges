@@ -89,7 +89,7 @@ code {
 #help h2,
 #help h3,
 #help p {
-	max-width: 640px;
+	max-width: 600px;
 	cursor: text;
 }
 #help a {
