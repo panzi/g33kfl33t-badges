@@ -64,8 +64,8 @@ code {
 	bottom: 20px;
 	box-shadow: 0 0 15px rgba(0,0,0,0.5);
 	background: white;
-	background: rgba(255,255,255,0.8);
-	cursor: initial;
+	background: rgba(255,255,255,0.9);
+	cursor: default;
 }
 #help_content {
 	position: absolute;
@@ -80,6 +80,10 @@ code {
 #help h3,
 #help p {
 	max-width: 640px;
+	cursor: text;
+}
+#help a {
+	cursor: pointer;
 }
 
 #help h2 {
