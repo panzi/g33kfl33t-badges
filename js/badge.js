@@ -487,6 +487,17 @@ $(document).ready(function ($) {
 	$("#username, #link").on('keyup cut paste drop', defer(updatePreview));
 	$("#username, #link, #size, #dpi, #border, #qrcode").change(updatePreview);
 
+	$("#help_wrapper").click(function (event) {
+		if (event.target === this) {
+			$(document.body).removeClass('help-shown');
+		}
+	}).on('mousewheel DOMMouseScroll', function (event) {
+		if (event.target === this) {
+			event.preventDefault();
+			event.stopPropagation();
+		}
+	});
+
 	if (location.search) {
 		setBadgeFormData(getBadgeParamsFromQuery());
 	}

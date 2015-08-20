@@ -10,6 +10,8 @@
 }
 body {
 	background: #f0f0f0;
+	font-family: sans-serif;
+	line-height: 1.5;
 }
 h1 {
 	text-align: center;
@@ -37,16 +39,101 @@ canvas {
 input[type=number] {
 	text-align: right;
 }
+code {
+	background-color: white;
+	padding: 1px 2px;
+	border: 1px solid lightgray;
+	border-radius: 3px;
+	color: #303030;
+}
 #dpi {
 	width: 4em;
 }
 #print_badge {
 	display: none;
 }
-
 #size option {
 	text-align: right;
 	padding-right: 1em;
+}
+#help_wrapper {
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	height: 0%;
+	overflow: hidden;
+	transition: height 500ms;
+	cursor: pointer;
+}
+#help {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 20px;
+	box-shadow: 0 0 15px rgba(0,0,0,0.5);
+	background: white;
+	background: rgba(255,255,255,0.7);
+	cursor: initial;
+}
+#help_content {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	overflow: auto;
+	padding-bottom: 50px;
+}
+#help h2,
+#help h3,
+#help p {
+	max-width: 640px;
+}
+
+#help h2 {
+	margin: 2em auto 0.5em auto;
+}
+
+#help h3 {
+	margin: 1.5em auto 0.5em auto;
+}
+
+#help p {
+	margin: 1em auto;
+	text-align: justify;
+}
+#help .hide-button {
+	text-decoration: none;
+	position: absolute;
+	bottom: 10px;
+	right: 30px;
+	font-size: 26px;
+	font-weight: bold;
+	color: lightgray;
+}
+#help .hide-button:hover {
+	color: gray;
+}
+.help-button {
+	text-decoration: none;
+}
+body.help-shown {
+	overflow: hidden;
+}
+.help-shown #help_wrapper {
+	height: 100%;
+}
+h1,
+#badge_form,
+#preview_badge {
+	transition: -webkit-filter 500ms;
+}
+.help-shown h1,
+.help-shown #badge_form,
+.help-shown #preview_badge {
+	-webkit-filter: blur(10px);
 }
 @media print {
 	body {
@@ -55,13 +142,12 @@ input[type=number] {
 	h1,
 	#badge_form,
 	#preview_badge,
-	#force_font {
+	#force_font,
+	#help_wrapper {
 		display: none;
 	}
 	#print_badge {
 		border-width: 0.5mm;
-	}
-	#print_badge {
 		display: block;
 	}
 }
