@@ -18,6 +18,7 @@
 		<form action="javascript:;" id="badge_form">
 			<label for="username">Name:</label>
 			<input type="text" id="username" placeholder="(User-)Name" autofocus/>
+			<a href="javascript:;" onclick="$(document.body).addClass('help-shown');" class="help-button" title="Help">[?]</a>
 			<br/>
 
 			<label for="link">Link or Twitch user:</label>
@@ -52,18 +53,112 @@
 			</label>
 
 			<input id="background" type="checkbox" checked/>
-			<label for="background">background</label>
+			<label for="background">Background</label>
 			<br/>
 
 			<button type="submit">Save as PNG</button>
 
 			<input id="border" type="checkbox"/>
-			<label for="border">show border</label>
+			<label for="border">Show border</label>
 
 			<button type="button" onclick="printBadge(); return false;">Print</button>
 		</form>
 
 		<canvas id="preview_badge"></canvas>
 		<canvas id="print_badge"></canvas>
+
+		<div id="help_wrapper">
+			<div id="help">
+				<div id="help_content">
+					<h2>Help</h2>
+					<p>
+						All fields are optional. If nothing is entered anywhere you simply
+						get a generic #TeamHooman badge.
+					</p>
+
+					<h3>Name</h3>
+					<p>
+						Your name. Can be a real name or your online handle.
+					</p>
+					
+					<h3>Link and QR Code</h3>
+					<p>
+						These two fields are linked. The QR Code will point to the
+						povided link. Besides a propper URL the link may also just be of
+						the form <code>www.example.com</code> (notice the lack of
+						<code>http://</code>) or <code>mail@example.com</code> (it will be
+						auto-completed to <code>mailto:mail@example.com</code> for the QR
+						code) or <code>@twitteruser</code> (it will be auto-completed to
+						<code>http://twitter.com/twitteruser</code>) or simple a
+						<code>Twitch_username</code> (it will be auto-completed to
+						<code>http://twitch.tv/Twitch_username</code>).
+					</p>
+					<p>
+						If the name field is not given the link field will be rendered
+						as big as name field would otherwise be rendered. So if you just
+						want to use you Twitch user name as your name but still provide
+						the QR code link write it into the link field and nothing into the
+						name field.
+					</p>
+
+					<h3>Size</h3>
+					<p>
+						Choose the size of the printed badge. I found these sizes by
+						googling for common badge sizes and measuring some old badge
+						covers I had.
+					</p>
+					<p>
+						<strong>Note:</strong> It might still happen that your browser
+						won't print the badge at the correct size. Make sure to deactivate
+						any scaling options in the print dialog. Even then Safari under
+						Mac OS X didn't print it at the exact correct size when I tried it,
+						but Firefox did.
+					</p>
+
+					<h3>DPI</h3>
+					<p>
+						The dots (pixel) per inch.
+					</p>
+					<p>
+						When saving a PNG file this just results in a larger (higher
+						resulution) image. There is no way in JavaScript to mark a
+						generated PNG of a certain physical size. If you print it later
+						you need to provide the correct physical size yourself.
+					</p>
+					<p>
+						When printing this should kinda control the DPI of the printed
+						image, but only if the browser and printer driver also use the
+						same DPI. This means if you provide a lower DPI value than the
+						browser uses when printing the printout will be pixelated. If
+						you provide a higher value the extra pixels are simply useless
+						(but no harm done).
+					</p>
+
+					<h3>Background</h3>
+					<p>
+						Disable this option if you want to save ink and not print the
+						background gradient.
+					</p>
+
+					<h3>Show border</h3>
+					<p>
+						Show a gray border around the badge. This only really makes sense
+						if the badge has a white background so you know where to cut the
+						printout. It won't be contained in the generated PNG, though.
+					</p>
+
+					<h2>About</h2>
+					<p>
+						This badge generator was made by Mathias Panzenb&ouml;ck and uses
+						artwork by <a href="http://jonwest.co/">Jon West</a>. The source
+						can be found on <a href="https://github.com/panzi/hooman-badges">GitHub</a>.
+						See also the <a href="http://panzi.github.io/g33kfl33t-badges/">G33kFl33t
+						Badge Generator</a>.
+					</p>
+				</div>
+
+				<a href="javascript:;" onclick="$(document.body).removeClass('help-shown');" class="hide-button">&times;</a>
+			</div>
+		</div>
 	</body>
 </html>
