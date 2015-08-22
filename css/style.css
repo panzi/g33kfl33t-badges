@@ -61,7 +61,7 @@ code {
 	left: 0;
 	right: 0;
 	top: 0;
-	bottom: 20px;
+	bottom: 40px;
 	box-shadow: 0 0 15px rgba(0,0,0,0.5);
 	background: white;
 	background: rgba(255,255,255,0.9);
@@ -103,7 +103,7 @@ code {
 	position: absolute;
 	bottom: 10px;
 	right: 30px;
-	font-size: 26px;
+	font-size: 38px;
 	font-weight: bold;
 	color: lightgray;
 }
